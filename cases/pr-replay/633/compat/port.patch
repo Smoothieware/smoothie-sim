@@ -1,0 +1,19 @@
+--- a/src/modules/tools/iremitter/Iremitter.cpp	2026-10-17 00:12:06.955415617 +0200
++++ b/src/modules/tools/iremitter/Iremitter.cpp	2026-10-17 00:12:07.475384888 +0200
+@@ -37,7 +37,6 @@
+ 
+ 	// events
+ 	this->register_for_event(ON_GCODE_RECEIVED);
+-	this->register_for_event(ON_GCODE_EXECUTE);
+ }
+ 
+ void Iremitter::on_config_reload(void *argument)
+@@ -73,7 +72,7 @@
+ 
+ 	// if executable, append to the queue
+ 	if (this->is_executable(gcode))
+-		THEKERNEL->conveyor->append_gcode(gcode);
++		{ THEKERNEL->conveyor->wait_for_idle(); this->on_gcode_execute(gcode); }   // compat: the PR predates ON_GCODE_EXECUTE and Conveyor::append_gcode
+ }
+ 
+ void Iremitter::on_gcode_execute(void *argument)

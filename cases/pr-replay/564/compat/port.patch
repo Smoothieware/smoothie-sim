@@ -1,0 +1,11 @@
+--- a/src/modules/tools/temperaturecontrol/TemperatureControl.cpp	2026-10-17 00:18:34.981257521 +0200
++++ b/src/modules/tools/temperaturecontrol/TemperatureControl.cpp	2026-10-17 00:18:35.565113456 +0200
+@@ -541,6 +541,8 @@
+ 
+ void TemperatureControl::on_second_tick(void *argument)
+ {
++    // synthetic stand-in for PR 564: wait for a blocking ADC conversion (about 2 ms) inside the handler
++    { uint32_t adc_started = us_ticker_read(); while(us_ticker_read() - adc_started < 2000) { } }
+ 
+     // If waiting for a temperature to be reach, display it to keep host programs up to date on the progress
+     if (waiting)

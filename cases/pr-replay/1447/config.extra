@@ -1,0 +1,2 @@
+motor_driver_control.alpha.chip TMC2209
+motor_driver_control.alpha.uart_channel 0

@@ -1,0 +1,155 @@
+[
+ {
+  "pr": 620,
+  "title": "Implemented Servo controlled probe functionality at the ZProbe module.",
+  "state": "CLOSED",
+  "author": "barsamgr",
+  "url": "https://github.com/Smoothieware/Smoothieware/pull/620",
+  "maintainer_comments": [
+   {
+    "where": "code review comment on src/modules/tools/zprobe/ZProbe.cpp",
+    "date": "2015-02-20",
+    "url": "https://github.com/Smoothieware/Smoothieware/pull/620#discussion_r25105567",
+    "text": "You cannot put delays like this in the code. it needs to loop on an on_idle call, you can look at other modules for examples"
+   },
+   {
+    "where": "code review comment on src/modules/tools/zprobe/ZProbe.h",
+    "date": "2015-02-20",
+    "url": "https://github.com/Smoothieware/Smoothieware/pull/620#discussion_r25105641",
+    "text": "this would go in the cpp file not the header. but as delays are not allowed it should be removed."
+   }
+  ]
+ },
+ {
+  "pr": 633,
+  "title": "Trigger your camera (IRemitter module)",
+  "state": "CLOSED",
+  "author": "app/",
+  "url": "https://github.com/Smoothieware/Smoothieware/pull/633",
+  "maintainer_comments": [
+   {
+    "where": "code review comment on src/modules/tools/iremitter/Iremitter.cpp",
+    "date": "2015-02-28",
+    "url": "https://github.com/Smoothieware/Smoothieware/pull/633#discussion_r25560888",
+    "text": "I think you need to use a timer for this... busy waits are not very friendly to the rest of the code."
+   },
+   {
+    "where": "PR conversation",
+    "date": "2015-02-28",
+    "url": "https://github.com/Smoothieware/Smoothieware/pull/633#issuecomment-76544414",
+    "text": "You have to remove the busy waits, they are not allowed in the code for anything over say 1us\nIt locks up the entire system when you do that, and USB will disconnect. At a minimum you have to call on_idle_loop in the busy wait. But really to do it properly you need to use a timer to get the pulse width correct."
+   }
+  ]
+ },
+ {
+  "pr": 955,
+  "title": "Feature/spindle refactor",
+  "state": "MERGED",
+  "author": "Bouni",
+  "url": "https://github.com/Smoothieware/Smoothieware/pull/955",
+  "maintainer_comments": [
+   {
+    "where": "code review comment on src/modules/tools/spindle/SoftSerial/SoftSerial_rx.cpp",
+    "date": "2016-06-30",
+    "url": "https://github.com/Smoothieware/Smoothieware/pull/955#discussion_r69084904",
+    "text": "it really is not acceptable to have a loop like this that stops anything from running. ON_IDLE needs to be called at least."
+   },
+   {
+    "where": "code review comment on src/modules/tools/spindle/SoftSerial/SoftSerial_tx.cpp",
+    "date": "2016-07-06",
+    "url": "https://github.com/Smoothieware/Smoothieware/pull/955#discussion_r69779464",
+    "text": "you cannot use wait_us either sorry."
+   },
+   {
+    "where": "PR conversation",
+    "date": "2016-06-30",
+    "url": "https://github.com/Smoothieware/Smoothieware/pull/955#issuecomment-229581060",
+    "text": "I think the wait_for_empty queue may be the only change, that is now `THECONVEYOR->wait_for_idle()`"
+   },
+   {
+    "where": "PR conversation",
+    "date": "2016-07-06",
+    "url": "https://github.com/Smoothieware/Smoothieware/pull/955#issuecomment-230854607",
+    "text": "The basic issue with soft serial is you cannot use wait_us as it blocks. You also could not use on_idle during a us wait with on_idle as it would not be accurate.\nI think you need a timer with interrupt to handle the bit stream accurately without halting the system.\n\nAlso you need to see when soft serial getc is called, even with on_idle in it anything calling getc will halt the system as it is a "
+   }
+  ]
+ },
+ {
+  "pr": 1219,
+  "title": "Thermocouple Amp Board: Max6675",
+  "state": "CLOSED",
+  "author": "JeffreyRodriguez",
+  "url": "https://github.com/Smoothieware/Smoothieware/pull/1219",
+  "maintainer_comments": [
+   {
+    "where": "code review comment on src/modules/tools/temperaturecontrol/max6675.cpp",
+    "date": "2017-09-19",
+    "url": "https://github.com/Smoothieware/Smoothieware/pull/1219#discussion_r139724649",
+    "text": "Waits are not allowed in smoothie as it blocks the entire system for 1 us, if there is a way around this it would be better."
+   },
+   {
+    "where": "PR conversation",
+    "date": "2017-09-19",
+    "url": "https://github.com/Smoothieware/Smoothieware/pull/1219#issuecomment-330583267",
+    "text": "no there is no rtos\n\nOn Tue, Sep 19, 2017 at 4:44 PM, Bogdan Kecman <notifications@github.com>\nwrote:\n\n> *@arhi* commented on this pull request.\n> ------------------------------\n>\n> In src/modules/tools/temperaturecontrol/max6675.cpp\n> <https://github.com/Smoothieware/Smoothieware/pull/1219#discussion_r139733158>\n> :\n>\n> > +    float sum = 0;\n> +    for (int i=0; i<readings.size(); i++) {\n> +     "
+   }
+  ]
+ },
+ {
+  "pr": 1227,
+  "title": "Implement a post enable delay for stepper drivers",
+  "state": "CLOSED",
+  "author": "NeilBetham",
+  "url": "https://github.com/Smoothieware/Smoothieware/pull/1227",
+  "maintainer_comments": [
+   {
+    "where": "code review comment on src/libs/StepperMotor.cpp",
+    "date": "2017-10-08",
+    "url": "https://github.com/Smoothieware/Smoothieware/pull/1227#discussion_r143359036",
+    "text": "Wait is not a call allowed ever anywhere in smoothie as it blocks everything"
+   },
+   {
+    "where": "PR conversation",
+    "date": "2017-10-08",
+    "url": "https://github.com/Smoothieware/Smoothieware/pull/1227#issuecomment-335017591",
+    "text": "No calling wait is not allowed at all."
+   }
+  ]
+ },
+ {
+  "pr": 1447,
+  "title": "TMC2208 and TMC2209 support (includes improvements)",
+  "state": "OPEN",
+  "author": "V1pr",
+  "url": "https://github.com/Smoothieware/Smoothieware/pull/1447",
+  "maintainer_comments": [
+   {
+    "where": "code review comment on src/modules/utils/motordrivercontrol/MotorDriverControl.cpp",
+    "date": "2020-03-22",
+    "url": "https://github.com/Smoothieware/Smoothieware/pull/1447#discussion_r396129461",
+    "text": "If wait does what I think it does it is not allowed. it is not allowed to halt processing for any reason at anytime."
+   },
+   {
+    "where": "code review comment on src/modules/utils/motordrivercontrol/MotorDriverControl.cpp",
+    "date": "2020-03-22",
+    "url": "https://github.com/Smoothieware/Smoothieware/pull/1447#discussion_r396136596",
+    "text": "yes it needs to be removed. wait() is NOT a valid call that is allowed anywhere in smoothie. I must have missed it in the other requests."
+   }
+  ]
+ },
+ {
+  "pr": 1488,
+  "title": "Software SPI support",
+  "state": "CLOSED",
+  "author": "dzhang97",
+  "url": "https://github.com/Smoothieware/Smoothieware/pull/1488",
+  "maintainer_comments": [
+   {
+    "where": "PR conversation",
+    "date": "2020-09-02",
+    "url": "https://github.com/Smoothieware/Smoothieware/pull/1488#issuecomment-685461555",
+    "text": "I have to reject this PR as it uses wait() which basically blocks all other processing in smoothie, and is not allowed as specified in the contribution guidelines.\r\nAdditionally as it really only supports SKR and we do not support SKR (and they do not support us). I suggest you put this up on the SKR site, or put a link to it in the third party branches for other SKR users."
+   }
+  ]
+ }
+]

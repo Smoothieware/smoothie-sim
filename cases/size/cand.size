@@ -1,0 +1,10 @@
+firmware.elf  :
+section              size        addr
+.isr_vector           232           0
+.text              412600         232
+.ARM.exidx           4000      412232
+.data                 2400  268435456
+.bss                  20512  268437856
+.AHBSRAM0             8000  537378816
+.heap_stack            100  268457856
+Total               446732

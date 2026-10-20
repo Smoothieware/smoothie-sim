@@ -1,0 +1,3 @@
+temperature_control.hotend.sensor max6675
+temperature_control.hotend.chip_select_pin 0.16
+temperature_control.hotend.spi_channel 0

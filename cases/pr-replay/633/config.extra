@@ -1,0 +1,4 @@
+iremitter.enable true
+iremitter.mcode 240
+iremitter.pin 1.30
+iremitter.camera nikon

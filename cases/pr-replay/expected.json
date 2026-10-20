@@ -1,0 +1,57 @@
+{
+  "564": {
+    "static": true,
+    "runtime": true,
+    "runtime_note": "synthetic case (cases/pr-replay/564/compat/README.md)",
+    "runtime_modules": [
+      "TemperatureControl"
+    ]
+  },
+  "620": {
+    "static": true,
+    "runtime": false,
+    "runtime_note": "the PR tree does not compile against edge: ZProbe.cpp:85-88 servo_pin_checksum, servo_pin, servo_percent, servo_percent_checksum undeclared (2 hunks of the PR diff no longer apply)"
+  },
+  "633": {
+    "static": true,
+    "runtime": true,
+    "runtime_note": "",
+    "runtime_modules": [
+      "Iremitter"
+    ]
+  },
+  "955": {
+    "static": true,
+    "runtime": false,
+    "runtime_note": "the PR tree does not compile against edge: SoftSerial.h:16 'expected class-name before {'"
+  },
+  "1219": {
+    "static": true,
+    "runtime": true,
+    "runtime_note": "",
+    "runtime_modules": [
+      "TemperatureControl"
+    ]
+  },
+  "1227": {
+    "static": true,
+    "runtime": true,
+    "runtime_note": "",
+    "runtime_modules": [
+      "StepperMotor"
+    ]
+  },
+  "1447": {
+    "static": true,
+    "runtime": false,
+    "runtime_note": "the PR tree does not compile against edge: MotorDriverControl.cpp:100-119 member and DRV8711 errors (1 hunk of the PR diff no longer applies)"
+  },
+  "1488": {
+    "static": true,
+    "runtime": true,
+    "runtime_note": "",
+    "runtime_modules": [
+      "MotorDriverControl"
+    ]
+  }
+}

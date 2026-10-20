@@ -1,0 +1,3 @@
+spindle.enable true
+spindle.type modbus
+spindle.vfd_type huanyang

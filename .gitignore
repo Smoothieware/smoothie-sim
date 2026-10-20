@@ -1,0 +1,23 @@
+# Local documentation (not published; published docs live in documentation/)
+/docs/
+
+# Build and run output
+/build/
+/fw/
+/out/
+*.gcda
+*.gcno
+*.o
+
+# Python
+__pycache__/
+*.pyc
+
+# Editor and OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Local agent instructions (not published)
+/CLAUDE.md

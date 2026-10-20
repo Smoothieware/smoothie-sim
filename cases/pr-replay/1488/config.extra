@@ -1,0 +1,4 @@
+motor_driver_control.alpha.spi_channel -1
+motor_driver_control.alpha.spi_mosi_pin 1.17
+motor_driver_control.alpha.spi_miso_pin 0.5
+motor_driver_control.alpha.spi_sclk_pin 0.4

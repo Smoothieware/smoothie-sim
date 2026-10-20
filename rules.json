@@ -1,0 +1,77 @@
+{
+  "calls": {
+    "wait": {
+      "status": "forbidden",
+      "reason": "mbed wait(): busy delay that halts all processing (maintainer: 'wait() is not allowed anywhere in smoothie')"
+    },
+    "wait_ms": {
+      "status": "forbidden",
+      "reason": "busy delay that halts all processing"
+    },
+    "wait_us": {
+      "status": "forbidden",
+      "reason": "busy delay that halts all processing (maintainer: 'you cannot use wait_us, it blocks')"
+    },
+    "sleep": {
+      "status": "forbidden",
+      "reason": "blocking sleep"
+    },
+    "safe_delay_ms": {
+      "status": "ask-maintainer",
+      "reason": "keeps running the idle handlers but still blocks the caller; the maintainer's opinion on it is not on record"
+    },
+    "safe_delay_us": {
+      "status": "ask-maintainer",
+      "reason": "same as safe_delay_ms"
+    },
+    "safe_delay": {
+      "status": "ask-maintainer",
+      "reason": "runtime record of safe_delay_ms/us (same rule)"
+    },
+    "wait_for_idle": {
+      "status": "allowed",
+      "reason": "waits for the planner queue to drain; accepted by the maintainers (pending final confirmation), never reported"
+    }
+  },
+  "short_wait": {
+    "call": "wait_us",
+    "max_us": 2,
+    "status": "ask-maintainer",
+    "reason": "a wait of about 1-2 microseconds is shorter than a function call overhead on the MCU; the maintainer still objected to wait_us(1) in PR 1219 ('blocks the entire system for 1 us'), so the maintainers decide"
+  },
+  "busy_loop_pattern": "us_ticker_read\\s*\\(",
+  "allow": [
+    "src/libs/utils.cpp",
+    "src/modules/utils/simpleshell/",
+    "src/main.cpp",
+    "src/libs/Kernel.cpp"
+  ],
+  "accepted_runtime_waits": [
+    {
+      "module": "Panel",
+      "max_us": 100,
+      "reason": "display-driver bit-bang setup/hold times (ST7920 10 us per byte, ST7565 20-40 us); datasheet timing in merged edge code, tens of microseconds, not a design choice"
+    }
+  ],
+  "known_debt_runtime_waits": [
+    {
+      "module": "Panel",
+      "event": "ON_IDLE",
+      "reason": "one-time LCD power-on delays (90 ms and 10 ms in RrdGlcd::initDisplay) run from Panel::on_idle on edge today; reported as a warning, not a failure, until the panel init becomes a state machine"
+    }
+  ],
+  "runtime_long_handler_us": 1000,
+  "long_handler_allow": {
+    "Endstops::ON_GCODE_RECEIVED": "G28 homing: the handler runs the homing moves and loops on idle events until they finish; long by design",
+    "ZProbe::ON_GCODE_RECEIVED": "G30/G32 probing: the handler runs probe moves and waits for them to finish; long by design",
+    "Panel::ON_IDLE": "LCD power-on delays (see known_debt_runtime_waits); counted as a wait there",
+    "Robot::ON_GCODE_RECEIVED": "G4 dwell: drains the queue (wait_for_idle, allowed), then loops running idle events for the requested P milliseconds (Robot.cpp, case 4)",
+    "Player::ON_MAIN_LOOP": "M600 suspend (the filament detector's jam response): suspend_part2 drains the planner queue with wait_for_idle (allowed), then runs the park move (Player.cpp, suspend_part2)",
+    "Switch::ON_GCODE_RECEIVED": "drains the planner queue with wait_for_idle (allowed) before it changes the output (Switch.cpp, on_gcode_received)",
+    "TemperatureControl::ON_GCODE_RECEIVED": "M104/M109 drain the planner queue with wait_for_idle (allowed) before setting the temperature (TemperatureControl.cpp:342)"
+  },
+  "scan_dirs": [
+    "src/modules",
+    "src/libs"
+  ]
+}
