@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# smoothie-sim command: builds the simulator from a Smoothieware tree and runs the checkers.
+# Installed as <prefix>/bin/smoothie-sim next to <prefix>/share/smoothie-sim (Makefile, checkers, cases, ...).
+set -euo pipefail
+SELF=$(readlink -f "${BASH_SOURCE[0]}")
+SHARE=${SMOOTHIE_SIM_HOME:-$(dirname "$SELF")/../share/smoothie-sim}
+[ -f "$SHARE/Makefile" ] || { echo "smoothie-sim: no installation found at $SHARE (set SMOOTHIE_SIM_HOME)" >&2; exit 1; }
+SHARE=$(cd "$SHARE" && pwd)
+# The installed tree may be read-only: never write Python bytecode into it.
+export PYTHONDONTWRITEBYTECODE=1
+CACHE=${SMOOTHIE_SIM_CACHE:-${XDG_CACHE_HOME:-$HOME/.cache}/smoothie-sim}
+
+usage() {
+  cat <<USAGE
+smoothie-sim $(cat "$SHARE/VERSION")
+
+  smoothie-sim build [make arguments]   build ./build/smoothie-sim from a Smoothieware tree
+  smoothie-sim check [run_checks.sh arguments]   run the checkers and write ./out/report.html
+  smoothie-sim version | path | help
+
+Without SMOOTHIE_SRC, both use a shallow clone of Smoothieware's edge branch cached in
+$CACHE/fw (SMOOTHIE_REPO and SMOOTHIE_BRANCH override it).
+build accepts the Makefile variables (SMOOTHIE_SRC=<tree>, BUILD=<dir>, EXTRA_FILES=...) and make options such as -j8.
+check takes: [SIM_BINARY [FIRMWARE_SRC [BASE_SRC [OUTDIR [REF_ELF CAND_ELF]]]]]; omitted leading ones default to
+./build/smoothie-sim, the firmware tree, - and ./out. Full documentation: $SHARE/documentation/README.md
+USAGE
+}
+
+firmware_tree() {
+  if [ -n "${SMOOTHIE_SRC:-}" ]; then printf '%s\n' "$SMOOTHIE_SRC"; return; fi
+  printf '%s\n' "$CACHE/fw"
+}
+
+case "${1:-help}" in
+  version|--version|-V) cat "$SHARE/VERSION" ;;
+  path) printf '%s\n' "$SHARE" ;;
+  help|--help|-h) usage ;;
+  build)
+    shift
+    src_args=()
+    case " $* " in *" SMOOTHIE_SRC="*) ;; *)
+      fw=$(firmware_tree)
+      if [ ! -f "$fw/src/main.cpp" ]; then
+        mkdir -p "$(dirname "$fw")"
+        git clone --depth 1 --branch "${SMOOTHIE_BRANCH:-edge}" "${SMOOTHIE_REPO:-https://github.com/Smoothieware/Smoothieware}" "$fw"
+      fi
+      src_args=("SMOOTHIE_SRC=$fw") ;;
+    esac
+    case " $* " in *" BUILD="*) ;; *) src_args+=("BUILD=$PWD/build") ;; esac
+    exec make -f "$SHARE/Makefile" "${src_args[@]}" "$@" ;;
+  check)
+    shift
+    fw=$(firmware_tree)
+    [ -f "$fw/src/main.cpp" ] || { echo "smoothie-sim: no firmware tree at $fw; run 'smoothie-sim build' first or set SMOOTHIE_SRC" >&2; exit 1; }
+    defaults=("$PWD/build/smoothie-sim" "$fw" "-" "$PWD/out")
+    args=("$@")
+    while [ "${#args[@]}" -lt 4 ]; do args+=("${defaults[${#args[@]}]}"); done
+    exec bash "$SHARE/run_checks.sh" "${args[@]}" ;;
+  *) usage >&2; exit 2 ;;
+esac

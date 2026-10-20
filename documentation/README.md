@@ -5,6 +5,7 @@ The [README](../README.md) is the short version; these pages have the detail.
 
 | Page | What it covers |
 | --- | --- |
+| [Installation](installation.md) | Install from a release: script, tarball, deb, rpm or container image; the `smoothie-sim` command; how releases are made. |
 | [Getting started](getting-started.md) | Requirements, building the simulator, running the checkers, reading the report. |
 | [How it works](how-it-works.md) | Staging, the host shims, stage patches, the simulator runtime and its output. |
 | [Checkers](checkers.md) | Each checker: what it verifies, its inputs and every option. |

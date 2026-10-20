@@ -1,0 +1,9 @@
+.git
+.github
+fw
+build
+out
+docs
+assets
+CLAUDE.md
+__pycache__

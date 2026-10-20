@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-20
+
+### Added (releases and packages)
+- Every `v*` tag publishes a GitHub release through `.github/workflows/release.yml`: `smoothie-sim-VERSION.tar.gz`, a `.deb`, an `.rpm`, `install.sh` and `SHA256SUMS`, plus a multi-architecture container image `ghcr.io/smoothieware/smoothie-sim` (amd64 and arm64). Pushes to `main` and pull requests run the same packaging and a full build-and-check smoke test without publishing.
+- The new `smoothie-sim` command (`packaging/smoothie-sim`) wraps the installed tree: `smoothie-sim build` builds `./build/smoothie-sim` from a cached shallow clone of Smoothieware `edge` (or `SMOOTHIE_SRC`), `smoothie-sim check` runs the checkers and writes `./out/report.html`.
+- `VERSION` file, `Dockerfile`, and `packaging/` scripts (`stage.sh` is the single install layout, `build-packages.sh`, `install.sh`, `release-notes.sh`). See [Installation](documentation/installation.md).
+- Linux only. macOS is not supported: the firmware core is built with GNU g++ flags and gcov, which have not been tried with Apple's compiler.
+
 ### Added (module coverage stimuli)
 - Workload stimulus lines: a `;@sim` comment in a workload G-code file is read by the simulator instead of the firmware. `pin <port.pin> <0|1>` sets the level of an input pin (panel buttons, SD card detect, bulge sensor), `pulses <port.pin> <count>` delivers rising edges to an interrupt pin (the `InterruptIn` shim now keeps the firmware's handler), `adc <raw>` changes the thermistor reading, `wait <ms>` lets simulated time pass with the main loop and idle running (second ticks, button polling).
 - The modules case now enters the handlers the report listed as never run or partly run: `FilamentDetector::on_pin_rise` and the M404 to M407 and M601 paths, jam and bulge alarms; `TemperatureSwitch::on_gcode_received` (new armed switch with `arm_mcode`) and its heat-up branch; `MotorDriverControl` second tick and the M906 to M911 sub-codes; `Panel` select, back, up, down, second tick (external SD) and the public-data message. With this, all 24 event-registering module files are fully exercised.

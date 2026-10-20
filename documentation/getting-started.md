@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Linux, `g++` with GNU C++14 support, `make` and `python3` 3. It is developed and tested on Linux with Python 3.11; the checkers use only the Python standard library. The CI workflow targets Ubuntu 22.04 but has not run yet.
+- Linux, `g++` with GNU C++14 support, `make` and `python3` 3. It is developed and tested on Linux with Python 3.11; the checkers use only the Python standard library. The release workflow builds and checks on Ubuntu 24.04. To install from a release instead of a checkout, see [Installation](installation.md).
 - A checkout of [Smoothieware](https://github.com/Smoothieware/Smoothieware) (the firmware under test). It is never modified.
 - Optional: `gcc-arm-none-eabi` and `binutils-arm-none-eabi` for the RAM and flash check (`size_check.py`); `gh` for the old-PR replay.
 

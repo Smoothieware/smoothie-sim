@@ -11,6 +11,8 @@ smoothie-sim copies a [Smoothieware](https://github.com/Smoothieware/Smoothiewar
 
 ## Quick start
 
+Install a [release](https://github.com/Smoothieware/smoothie-sim/releases) with `curl -fsSL https://github.com/Smoothieware/smoothie-sim/releases/latest/download/install.sh | sh` (also a `.deb`, an `.rpm` and a container image: [Installation](documentation/installation.md)) and run `smoothie-sim build && smoothie-sim check`. Or work from a checkout:
+
 You need `g++`, `make` and `python3` (standard library only) on Linux. The first `make` downloads the `edge` branch of [Smoothieware](https://github.com/Smoothieware/Smoothieware) into `fw/` (a shallow `git clone`), builds the simulator in `build/`, and needs no root. `run_checks.sh` with no arguments checks that firmware and writes results to `out/`.
 
 ```sh

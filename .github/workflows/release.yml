@@ -1,0 +1,123 @@
+name: release
+
+# Tag v<VERSION> (matching the VERSION file) publishes the GitHub release, the packages and the container image.
+# Pushes to main and pull requests build and smoke-test everything without publishing.
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  packages:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the tag matches the VERSION file
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: test "v$(tr -d '[:space:]' < VERSION)" = "${GITHUB_REF_NAME}"
+      - name: Install packaging tools
+        run: sudo apt-get update && sudo apt-get install -y rpm
+      - name: Build tarball, deb and rpm
+        run: packaging/build-packages.sh dist
+      - run: cp packaging/install.sh dist/install.sh
+      - name: Release notes
+        run: packaging/release-notes.sh "$(tr -d '[:space:]' < VERSION)" > dist/RELEASE_NOTES.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+  smoke-deb:
+    needs: packages
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with: {name: dist, path: dist}
+      - name: Install the deb
+        run: sudo apt-get install -y ./dist/*.deb && smoothie-sim version
+      - name: Build the simulator from Smoothieware edge and run the checkers
+        run: |
+          mkdir work && cd work
+          smoothie-sim build -j"$(nproc)"
+          smoothie-sim check
+          test -s out/report.html && test -s out/summary.md
+          cat out/summary.md
+
+  smoke-tarball-and-rpm:
+    needs: packages
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with: {name: dist, path: dist}
+      - name: Install from the tarball with install.sh
+        run: |
+          chmod +x dist/install.sh
+          PREFIX="$RUNNER_TEMP/prefix" SMOOTHIE_SIM_ARCHIVE="$(echo "$PWD"/dist/smoothie-sim-*.tar.gz)" dist/install.sh
+          "$RUNNER_TEMP/prefix/bin/smoothie-sim" version
+      - name: Install the rpm on Fedora
+        run: |
+          docker run --rm -v "$PWD/dist:/dist:ro" fedora:41 sh -c \
+            'dnf install -y /dist/*.rpm >/dev/null && smoothie-sim version && command -v g++ make git python3'
+
+  image:
+    needs: packages
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - name: Image name
+        id: meta
+        run: |
+          echo "name=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+          echo "version=$(tr -d '[:space:]' < VERSION)" >> "$GITHUB_OUTPUT"
+      - name: Build the image for the test
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: smoketest
+      - name: Smoke test the image
+        run: docker run --rm smoketest version
+      - uses: docker/login-action@v3
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish the multi-architecture image
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ steps.meta.outputs.name }}:${{ steps.meta.outputs.version }}
+            ${{ steps.meta.outputs.name }}:latest
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [smoke-deb, smoke-tarball-and-rpm, image]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with: {name: dist, path: dist}
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd dist
+          gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --title "smoothie-sim ${GITHUB_REF_NAME#v}" \
+            --notes-file RELEASE_NOTES.md \
+            smoothie-sim-*.tar.gz smoothie-sim_*_all.deb smoothie-sim-*.noarch.rpm install.sh SHA256SUMS
