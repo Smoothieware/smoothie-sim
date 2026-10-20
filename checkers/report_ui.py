@@ -306,6 +306,20 @@ def drawer(button_label: str, body_html: str, drawer_id: str, open_by_default: b
     return f'<div class="drawer-wrap">{button}{panel}</div>'
 
 
+# smoothie-sim logo: Tabler "cpu" outline (MIT) with an orange pulse line. The chip follows the text colour so it works in both themes.
+_LOGO_CHIP = ('<path d="M5 6a1 1 0 0 1 1 -1h12a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-12a1 1 0 0 1 -1 -1z"/>'
+              '<path d="M3 10h2M3 14h2M10 3v2M14 3v2M21 10h-2M21 14h-2M10 19v2M14 19v2"/>')
+_LOGO_PULSE = '<path d="M8 12h2l1.2 -2.6l1.8 5.2l1.2 -2.6h1.8" stroke="#FF6B35"/>'
+
+def logo(size: int = 20) -> str:
+    return (f'<svg class="logo" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
+            f'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{_LOGO_CHIP}{_LOGO_PULSE}</svg>')
+
+FAVICON_SVG = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'
+               '<style>.c{stroke:#1F2A44}@media(prefers-color-scheme:dark){.c{stroke:#E6EDF7}}</style>'
+               f'<g class="c">{_LOGO_CHIP}</g>{_LOGO_PULSE}</svg>')
+
+
 @_safe()
 def nav(items, brand: str = "", tools: bool = True) -> str:
     """Sticky top navigation. items: (anchor_id, label, icon_name). Includes theme and expand/collapse buttons."""
@@ -316,7 +330,7 @@ def nav(items, brand: str = "", tools: bool = True) -> str:
         except TypeError:
             continue
         links.append(f'<a href="#{_slug(anchor)}" data-spy title="{_e(label)}">{icon(ic, 16) if ic else ""}<span class="nav-label">{_e(label)}</span></a>')
-    brand_html = f'<a class="nav-brand" href="#top" title="Back to top">{icon("sparkles", 16)}<span>{_e(brand)}</span></a>' if brand else ""
+    brand_html = f'<a class="nav-brand" href="#top" title="Back to top">{logo(18)}<span>{_e(brand)}</span></a>' if brand else ""
     tool_html = ""
     if tools:
         tool_html = ('<div class="topnav-tools">'

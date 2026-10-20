@@ -4,7 +4,7 @@
 The HTML is one self-contained file: inline CSS, inline JS, inline SVG icons (report_ui.py), no external requests.
 Module coverage is rendered by report_coverage.py; the shared look and behaviour (icons, badges, drawers, tables) live in report_ui.py.
 """
-import argparse, datetime, html, json, math, os, sys
+import argparse, datetime, html, json, math, os, sys, urllib.parse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from common import block_positions, trapezoid_profile
 import report_ui as ui
@@ -346,7 +346,7 @@ def hero(title, subject, subject_link, overall, run_url, allr, R, stamp):
                             r["status"], r.get("icon", "")) for r in R if r.get("counts"))
     words = {"pass": "All checks passed", "warn": "Passed with warnings", "fail": "At least one check failed"}
     return (f'<header class="hero rp-hero {overall}"><div class="hero-top"><div class="rp-title"><span class="rp-orb">{icon(STATUS_ICON[overall], 34)}</span>'
-            f'<div><p class="eyebrow">{icon("cpu", 14)} smoothie-sim</p><h1>{esc(title)}</h1></div></div>'
+            f'<div><p class="eyebrow">{ui.logo(16)} smoothie-sim</p><h1>{esc(title)}</h1></div></div>'
             f'<span class="rp-verdict">{status_badge(overall)}<span>{words[overall]}</span></span></div>'
             f'{f"<p class=hero-sub>{subj}</p>" if subject else ""}<div class="chips">{"".join(chips)}</div>'
             f'<div class="stats">{cards}</div><h3 class="rp-h3">{icon("list-details", 16)} Per checker <span class="mut rp-legend">passed / warnings / failed</span></h3><div class="stats">{per}</div></header>')
@@ -481,6 +481,7 @@ def main():
     if sz: nav_items.append(("size", "RAM and flash", "memory"))
 
     h = [f"<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>{esc(a.title)}</title>"
+         f"<link rel=icon type=image/svg+xml href=\"data:image/svg+xml,{urllib.parse.quote(ui.FAVICON_SVG)}\">"
          f"<script>{ui.HEAD_JS}</script><style>{ui.CSS}\n{REPORT_CSS}</style></head><body>",
          ui.nav(nav_items, brand="smoothie-sim"), '<main class="page">',
          hero(a.title, a.subject, a.subject_link, overall, a.run_url, allr, R, stamp),

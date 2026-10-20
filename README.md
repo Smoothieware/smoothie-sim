@@ -1,3 +1,4 @@
+<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.svg"><img src="assets/logo.svg" alt="smoothie-sim logo: a chip with a pulse line" width="96"></picture></p>
 <h1 align="center">smoothie-sim</h1>
 <p align="center"><strong>Reviewing a Smoothieware pull request and no board on the bench?</strong><br>Run the real firmware core on your PC and let the checkers find bad planning, blocking waits and memory growth.</p>
 <p align="center"><sub>Linux · C++ · Python · GPL-2.0+</sub></p>

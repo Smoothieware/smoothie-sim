@@ -16,6 +16,10 @@
 - `modules_check.py --extra-run CONFIG WORKLOAD` (repeatable) runs another workload with its own config and merges its counters; used for a second panel type (`cases/modules/panel-config.txt`), because the up and down buttons only exist on the plain ST7565 panel and the back button only on the Reprap Discount one.
 - `rules.json`: the M600 suspend that the filament detector's jam response starts (`Player::ON_MAIN_LOOP`) is an allowed long handler (it drains the queue with `wait_for_idle`).
 
+### Added (logo)
+
+- smoothie-sim logo (a chip with a pulse line, navy and orange) in `assets/`, at the top of the README, as the report's page icon and in its top bar.
+
 ### Changed (report design)
 - The HTML report is redesigned as a single self-contained file: hero header with stat cards, sticky navigation with scroll-spy, light/dark theme toggle, Tabler icons (MIT, inlined, no network requests), restyled charts, sortable and filterable tables, copy buttons, and layouts that stack on phone width. Code: `checkers/report.py`, `checkers/report_ui.py`, `checkers/report_coverage.py`.
 - Module coverage keeps its table, and gains a summary strip, filters and a "More info" drawer per module: handler functions entered or not with call counts, what each state means, copyable snippets to exercise a module, and links to the source.
