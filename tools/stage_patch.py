@@ -6,6 +6,14 @@ import sys, pathlib
 
 root = pathlib.Path(sys.argv[1])  # staged src/ directory
 PATCHES = [
+    # Upstream StreamOutput::printf passes the same va_list to vsnprintf twice. That works on ARM, where va_list is a plain pointer
+    # restored by the callee, but on x86-64 the first call consumes it, so any message of 64 characters or more (M115) read garbage and crashed.
+    ("libs/StreamOutput.cpp",
+     "    int size = vsnprintf(b, 64, format, args) + 1;",
+     "    va_list args_again;\n    va_copy(args_again, args);\n    int size = vsnprintf(b, 64, format, args) + 1;"),
+    ("libs/StreamOutput.cpp",
+     "vsnprintf(buffer, size, format, args);",
+     "vsnprintf(buffer, size, format, args_again);"),
     ("libs/Kernel.cpp",
      "        (m->*kernel_callback_functions[id_event])(argument);",
      "        sim_event_begin(id_event, m);\n        (m->*kernel_callback_functions[id_event])(argument);\n        sim_event_end(id_event, m);"),

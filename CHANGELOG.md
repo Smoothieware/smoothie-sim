@@ -4,6 +4,9 @@
 
 ## [0.1.0] - 2026-10-20
 
+### Fixed
+- The simulator no longer crashes on any console message of 64 characters or more (the module workload died on `M115`): upstream `StreamOutput::printf` reuses a consumed `va_list`, which is harmless on ARM but undefined on x86-64. A stage patch now gives the second `vsnprintf` its own copy.
+
 ### Added (releases and packages)
 - Every `v*` tag publishes a GitHub release through `.github/workflows/release.yml`: `smoothie-sim-VERSION.tar.gz`, a `.deb`, an `.rpm`, `install.sh` and `SHA256SUMS`, plus a multi-architecture container image `ghcr.io/smoothieware/smoothie-sim` (amd64 and arm64). Pushes to `main` and pull requests run the same packaging and a full build-and-check smoke test without publishing.
 - The new `smoothie-sim` command (`packaging/smoothie-sim`) wraps the installed tree: `smoothie-sim build` builds `./build/smoothie-sim` from a cached shallow clone of Smoothieware `edge` (or `SMOOTHIE_SRC`), `smoothie-sim check` runs the checkers and writes `./out/report.html`.
