@@ -47,6 +47,13 @@ jobs:
           smoothie-sim check
           test -s out/report.html && test -s out/summary.md
           cat out/summary.md
+      - name: Backtrace of the crash
+        if: failure()
+        run: |
+          sudo apt-get install -y gdb >/dev/null
+          cd work
+          S=/usr/share/smoothie-sim/cases/modules
+          gdb -batch -ex 'set disable-randomization off' -ex run -ex bt -ex 'info registers rip' --args build/smoothie-sim --config $S/config.txt --out /tmp/m.json --gcode $S/workload.gcode --modules --no-steps 2>&1 | tail -40
 
   smoke-tarball-and-rpm:
     needs: packages
