@@ -45,7 +45,14 @@ A workload can drive what G-code cannot with comment lines that the simulator re
 
 Compares flash and RAM of a candidate firmware ELF with a reference ELF (`arm-none-eabi-size -A`, per-symbol growth from `nm`). Options: `--ref-elf`, `--cand-elf`, `--tool-prefix`
 (empty uses host binutils), `--max-flash-increase`, `--max-ram-increase`, `--top N`. For tests, pre-captured text can be given with `--ref-size-file`/`--cand-size-file` (see `cases/size/`).
-Heap and stack are not static and are not counted.
+Heap and stack are not static and are not counted here; the RAM model below covers the heap.
+
+### RAM model: `memory_check.py`
+
+Runs the simulator with `--alloc-trace` (every `new`, `malloc` and `MemoryPool` allocation with its call stack), maps each allocation to its size on the ARM, and replays it on the LPC1768 memory layout: the main SRAM heap (newlib `malloc`: 8-byte header, 8-byte alignment, first fit, growing from `__end__` towards the stack) and the AHB0 pool (Smoothieware's `MemoryPool`: 4-byte header, first fit, coalescing). The report shows peak live bytes, bytes live at the end, the largest free block, free space split into pieces, failed allocations and the room left below the stack limit.
+
+The layout comes from a real ARM build of the same firmware: `tools/lpc_memory_layout.py --map main.map --elf main.elf --host-elf build/smoothie-sim --out layout.json` (linker symbols `__end__`, `__StackLimit`, `__AHB0_dyn_start`, `__AHB0_end`, and the DWARF size of every class). Pass it with `LPC_LAYOUT=layout.json ./run_checks.sh ...` or `--layout`. Without it the checker reports "not measured" and never fails. Tests of the model: `python3 -I tests/test_memory_model.py`.
+
 
 ## 5. Feature checkers (need a firmware tree with the feature)
 

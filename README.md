@@ -94,4 +94,10 @@ Step timing is simulated at a 10 us tick and is approximate; SD, USB, network, l
 
 Report problems in this repository's issue tracker. Include the Smoothieware revision, the exact command and its output, with private content removed from logs. For any command, `checkers/<name>.py --help` and [Getting started](documentation/getting-started.md) list the options. Contributing: [CONTRIBUTING.md](CONTRIBUTING.md). Changes: [CHANGELOG.md](CHANGELOG.md).
 
-smoothie-sim is licensed under the [GNU GPL version 2 or later](LICENSE). The files in [`overlay/`](overlay/LICENSE-NOTE.md) are adapted from Smoothieware and stay under its GPL version 3 or later; a built simulator contains both, so it is distributed under GPL version 3 or later.
+smoothie-sim is licensed under the [GNU GPL version 2 or later](LICENSE). The files in [`overlay/`](overlay/LICENSE-NOTE.md) are adapted from Smoothieware and stay under its GPL version 3 or later; a built simulator contains both, so it is distributed under GPL version 3 or later. The same applies to the files adapted from the Carvera Firmware Simulator (GPL version 3 or later, see Acknowledgements).
+
+## Acknowledgements
+
+Parts of smoothie-sim are adapted from, or inspired by, the [Carvera Firmware Simulator](https://github.com/f355/carvera_firmware_simulator) by Konstantin Tcepliaev (GPL version 3 or later). Where their code is used, the file keeps their copyright header, and the combined work is GPL version 3 or later. Full list: [Acknowledgements](documentation/acknowledgements.md).
+
+- RAM model: heap and AHB pool replay on the LPC1768 layout, with ARM class sizes from DWARF (`checkers/memory_check.py`, `checkers/lpc_dwarf.py`, `tools/lpc_memory_layout.py`, `sim/sim_alloc.cpp`).

@@ -276,6 +276,16 @@ def replay_html(rows):
                    meta=f'{len(rows)} PRs, {bad} failing')
 
 
+def memory_html(d):
+    rows = []
+    for label, key, pool in (("Main SRAM heap", "main_sram", "heap"), ("AHB0 SRAM pool", "ahb0", "pool")):
+        m = d[key]
+        rows.append([label] + [(f'{num(m.get(k)):,.0f}', num(m.get(k))) for k in ("peak_live_bytes", "live_bytes_at_end", "largest_free_block", "fragmented_free_bytes", "failed_allocations")]
+                    + [(f'{num(m.get("margin_to_stack_bytes")):,.0f}', num(m.get("margin_to_stack_bytes"))) if key == "main_sram" else ("", 0)])
+    return (table([("Pool", ""), ("Peak live (B)", "num"), ("Live at end (B)", "num"), ("Largest free block (B)", "num"), ("Free but split (B)", "num"), ("Failed allocations", "num"), ("Room below stack (B)", "num")], rows, "memory")
+            + f'<p class="note">{int(num(d.get("allocations"))):,} allocations replayed on the LPC1768 layout of an ARM build; {int(num(d.get("size_inexact"))):,} keep their host size because no ARM class size matched, so the figures are estimates.</p>')
+
+
 def size_html(sz):
     rows_in = sz.get("rows") or []
     cards = "".join(stat_card(str(r.get("memory", "")), f'{num(r.get("delta")):+,.0f} B', "fail" if num(r.get("delta")) > 0 else "pass", "memory") for r in rows_in)
@@ -445,7 +455,7 @@ def build_modules(r, fw_label):
     return "".join(h)
 
 
-CHECKER_ICON = {"gcode_to_blocks": "route", "gcode_to_steps": "bolt", "modules": "plug", "size": "memory"}
+CHECKER_ICON = {"gcode_to_blocks": "route", "gcode_to_steps": "bolt", "modules": "plug", "size": "memory", "memory": "memory"}
 
 
 def main():
@@ -498,6 +508,8 @@ def main():
         body = checks_table(r)
         if r.get("checker") == "modules":
             body += build_modules(r, fw_label)
+        if r.get("checker") == "memory" and (r.get("data") or {}).get("measured"):
+            body += memory_html(r["data"])
         c = r.get("counts") or {}
         h.append(section(r["anchor"], r["icon"], r["title"], r["status"], body,
                          meta=f'{int(num(c.get("pass")))} passed, {int(num(c.get("fail")))} failed, {int(num(c.get("warn")))} warnings'))

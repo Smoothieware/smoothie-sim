@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- RAM model (`checkers/memory_check.py`, `tools/lpc_memory_layout.py`): the simulator can log every allocation (`--alloc-trace`), and the checker replays it on the LPC1768 main SRAM heap and AHB0 pool built from a real ARM build's linker map and DWARF class sizes. The report gets a section with peak live bytes, fragmentation, largest free block, failed allocations and the room below the stack; without an ARM build it says "not measured". `overlay/libs/MemoryPool.h` marks pool allocations as AHB0. The idea and the heap model are adapted from the Carvera Firmware Simulator by Konstantin Tcepliaev (GPL version 3 or later); see [Acknowledgements](documentation/acknowledgements.md).
 - README: one-line dependency install commands for nine Linux distributions, and the easily missed assumptions (GCC with a matching `gcov`, bash, GNU userland, network at first build, `patch` and `gh` for the PR replay).
 
 ## [0.1.0] - 2026-10-20

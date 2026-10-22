@@ -26,6 +26,7 @@
 #include "sim_hw.h"
 #include "sim_runtime.h"
 #include "sim_modules.h"
+#include "sim_alloc.h"
 #include <cstdio>
 #include <cstring>
 #include <cxxabi.h>
@@ -282,13 +283,13 @@ static void write_result(const char *path, const std::string &mode, bool full_st
 static std::string read_file(const std::string &p) { std::ifstream in(p); if (!in) { fprintf(stderr, "cannot read %s\n", p.c_str()); exit(2); } std::stringstream ss; ss << in.rdbuf(); return ss.str(); }
 
 int main(int argc, char **argv) {
-    std::string cfg, gcode, out = "sim-result.json", mode = "gcode", blocks_in;
+    std::string cfg, gcode, out = "sim-result.json", mode = "gcode", blocks_in, alloc_trace;
     bool full_steps = false, with_modules = false;
     for (int i = 1; i < argc; i++) {
         std::string a = argv[i];
         auto next = [&]() -> std::string { if (i + 1 >= argc) { fprintf(stderr, "missing value for %s\n", a.c_str()); exit(2); } return argv[++i]; };
         if (a == "--config") cfg = next(); else if (a == "--gcode") gcode = next(); else if (a == "--out") out = next();
-        else if (a == "--blocks-in") blocks_in = next(); else if (a == "--full-steps") full_steps = true; else if (a == "--no-steps") SIM.capture_steps = false;
+        else if (a == "--blocks-in") blocks_in = next(); else if (a == "--alloc-trace") alloc_trace = next(); else if (a == "--full-steps") full_steps = true; else if (a == "--no-steps") SIM.capture_steps = false;
         #ifdef SIM_RACE
         else if (a == "--race-force-every") { sim_race_set_force_every(strtoull(next().c_str(), nullptr, 10)); atexit(sim_race_report); }
         else if (a == "--race-window-us") { sim_race_set_window(atof(next().c_str())); atexit(sim_race_report); }
@@ -303,6 +304,7 @@ int main(int argc, char **argv) {
     memset(sim_config_buf, '\n', sizeof(sim_config_buf));
     memcpy(sim_config_buf, ctext.data(), ctext.size());
 
+    if (!alloc_trace.empty()) sim_alloc_start();
     static char pool_mem[1]; (void)pool_mem;
     _AHB0 = new MemoryPool(); _AHB1 = new MemoryPool();
     Kernel *kernel = new Kernel();
@@ -332,6 +334,7 @@ int main(int argc, char **argv) {
     kernel->conveyor->wait_for_idle();   // drain: everything queued gets executed by the step ticker
     sim_advance(1000, true);
     write_result(out.c_str(), mode, full_steps);
+    if (!alloc_trace.empty()) sim_alloc_write(alloc_trace.c_str());
     fprintf(stderr, "smoothie-sim: %zu blocks, %llu ticks, %zu waits recorded -> %s\n", SIM.blocks.size(), (unsigned long long)SIM.tick_counter, SIM.waits.size(), out.c_str());
     return 0;
 }
