@@ -26,7 +26,7 @@ The real Kernel, Robot, Planner, Conveyor, StepTicker, G-code dispatch and modul
 
 | File | Role |
 | --- | --- |
-| `sim_main.cpp` | Entry point. Fake clock, machine ticking (step ticker at a 10 us period), serial G-code input, capture of planner blocks and step pulses, handler timing, JSON output. |
+| `sim_main.cpp` | Entry point. Fake clock, machine ticking (step ticker at a 10 us period, timers served in time order, `--fixed-tick` for the old order), serial G-code input, capture of planner blocks and step pulses, handler timing, JSON output. |
 | `sim_hw.cpp` | Software model of GPIO ports, timers and the other peripherals the shims expose. |
 | `sim_modules.cpp` | Loads the modules for the module workload and implements the block injector used by `blocks_to_steps.py`. |
 | `sim_runtime.h` | Shared state (`BlockRec`, `SimState`). |

@@ -180,10 +180,21 @@ void sim_advance(uint64_t us, bool idle_time) {
     if (!SIM.machine_enabled || SIM.in_isr) return;
     bool outer_frames = !SIM.stack.empty();
     uint64_t before = SIM.now_us;
-    while (SIM.next_step_tick_us <= SIM.now_us) { step_tick_once(); SIM.next_step_tick_us += SIM.step_period_us; }
-    while (SIM.next_slow_tick_us <= SIM.now_us) {
+    auto slow_tick = [] {
         sim_tim[2].IR |= 1; TIMER2_IRQHandler(); SIM.next_slow_tick_us += 1000.0;
         if (Adc::instance) for (int c = 0; c < 8; c++) Adc::instance->new_sample(c, (uint32_t)SIM.adc_value << 4);   // fake thermistor reading (~25 C)
+    };
+    if (SIM.event_dispatch) {
+        // Event-driven: the earliest timer match runs first; a tie goes to the step ticker, which has the higher NVIC priority (TIMER0 is 2, TIMER2 is 4 in Kernel.cpp).
+        for (;;) {
+            bool step_due = SIM.next_step_tick_us <= SIM.now_us, slow_due = SIM.next_slow_tick_us <= SIM.now_us;
+            if (!step_due && !slow_due) break;
+            if (step_due && (!slow_due || SIM.next_step_tick_us <= SIM.next_slow_tick_us)) { step_tick_once(); SIM.next_step_tick_us += SIM.step_period_us; }
+            else slow_tick();
+        }
+    } else {
+        while (SIM.next_step_tick_us <= SIM.now_us) { step_tick_once(); SIM.next_step_tick_us += SIM.step_period_us; }
+        while (SIM.next_slow_tick_us <= SIM.now_us) slow_tick();
     }
     (void)outer_frames; (void)before;
 }
@@ -289,7 +300,7 @@ int main(int argc, char **argv) {
         std::string a = argv[i];
         auto next = [&]() -> std::string { if (i + 1 >= argc) { fprintf(stderr, "missing value for %s\n", a.c_str()); exit(2); } return argv[++i]; };
         if (a == "--config") cfg = next(); else if (a == "--gcode") gcode = next(); else if (a == "--out") out = next();
-        else if (a == "--blocks-in") blocks_in = next(); else if (a == "--alloc-trace") alloc_trace = next(); else if (a == "--full-steps") full_steps = true; else if (a == "--no-steps") SIM.capture_steps = false;
+        else if (a == "--blocks-in") blocks_in = next(); else if (a == "--alloc-trace") alloc_trace = next(); else if (a == "--event-dispatch") SIM.event_dispatch = true; else if (a == "--fixed-tick") SIM.event_dispatch = false; else if (a == "--full-steps") full_steps = true; else if (a == "--no-steps") SIM.capture_steps = false;
         #ifdef SIM_RACE
         else if (a == "--race-force-every") { sim_race_set_force_every(strtoull(next().c_str(), nullptr, 10)); atexit(sim_race_report); }
         else if (a == "--race-window-us") { sim_race_set_window(atof(next().c_str())); atexit(sim_race_report); }

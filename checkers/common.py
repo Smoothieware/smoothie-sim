@@ -38,7 +38,7 @@ def run_sim(binary, config, out, gcode=None, blocks_in=None, modules=False, full
         cmd += ["--modules"]
     if full_steps:
         cmd += ["--full-steps"]
-    cmd += list(extra)
+    cmd += list(extra) + os.environ.get("SMOOTHIE_SIM_ARGS", "").split()   # for example --event-dispatch, to run a whole checker set in another timer mode
     p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
     if p.returncode != 0:
         raise RuntimeError(f"simulator failed ({p.returncode}): {' '.join(cmd)}\n{p.stderr[-2000:]}")

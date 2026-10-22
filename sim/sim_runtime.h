@@ -50,6 +50,7 @@ struct SimState {
     int adc_value = 3900;           // 12-bit raw ADC value fed to every channel (default is about 25 C on a 100k thermistor)
     uint64_t now_us = 0;
     double next_step_tick_us = 0, next_slow_tick_us = 0;
+    bool event_dispatch = true;    // timers are served in time order, ties by interrupt priority; --fixed-tick restores all step ticks of a millisecond first
     double step_period_us = 10.0;
     bool machine_enabled = false;
     bool in_isr = false;

@@ -1,6 +1,6 @@
 # Limits
 
-- Step timing is simulated at a 10 us tick and is approximate. Real interrupt latency is not modelled.
+- Step timing is simulated at a 10 us tick and is approximate. Real interrupt latency is not modelled. The step and slow timers are served in time order, ties by NVIC priority (default); `--fixed-tick` (or `SMOOTHIE_SIM_ARGS=--fixed-tick` for the checkers) restores the old order of all step ticks of a millisecond first. Both gave identical results on every case and on the 8 replayed PRs (`tools/compare_dispatch.py`).
 - Not simulated: SD card, USB, network, laser, panel and spindle hardware. Their modules are loaded with stubbed hardware (PWM, SPI, SD slot, LCD), so their handlers run but not their electrical behaviour.
 - The module workload loads the event-registering modules (the coverage table in the report shows how much of each handler ran). The console `version` command is left out: it crashes the simulator.
 - No golden case exists yet for delta or SCARA kinematics.
