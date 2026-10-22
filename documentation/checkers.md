@@ -58,6 +58,11 @@ Runs the simulator with `--alloc-trace` (every `new`, `malloc` and `MemoryPool` 
 
 The layout comes from a real ARM build of the same firmware: `tools/lpc_memory_layout.py --map main.map --elf main.elf --host-elf build/smoothie-sim --out layout.json` (linker symbols `__end__`, `__StackLimit`, `__AHB0_dyn_start`, `__AHB0_end`, and the DWARF size of every class). Pass it with `LPC_LAYOUT=layout.json ./run_checks.sh ...` or `--layout`. Without it the checker reports "not measured" and never fails. Tests of the model: `python3 -I tests/test_memory_model.py`.
 
+### Fault injection: `fault_check.py`
+
+Runs `cases/faults/overtemp.gcode` (heater target set, then the thermistor reads far above `max_temp` through `;@sim adc`) and a control run where the thermistor stays cool, in the modules build.
+The real TemperatureControl must print its MAXTEMP error, assert HALT, switch the heater target off and make the machine refuse the next move; the control run must not halt.
+A config without a `temperature_control` section is reported as "not checked".
 
 ## 5. Feature checkers (need a firmware tree with the feature)
 

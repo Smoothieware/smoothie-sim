@@ -102,4 +102,5 @@ Parts of smoothie-sim are adapted from, or inspired by, the [Carvera Firmware Si
 
 - RAM model: heap and AHB pool replay on the LPC1768 layout, with ARM class sizes from DWARF (`checkers/memory_check.py`, `checkers/lpc_dwarf.py`, `tools/lpc_memory_layout.py`, `sim/sim_alloc.cpp`).
 - End-of-job position check: the idea of integrating emitted step and direction pulses into a position, from their `StepperAxis` (our own implementation, `checkers/position_check.py`).
+- Over-temperature fault injection: the idea from their `tests/temperature_fault_runtime_test.cpp` (our own implementation, `checkers/fault_check.py`).
 - Event-ordered timer dispatch: the design studied from their `timer_scheduler`, `interrupt_controller`, `event_engine` and `virtual_clock` (our own implementation in `sim/sim_main.cpp`).

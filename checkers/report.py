@@ -455,7 +455,7 @@ def build_modules(r, fw_label):
     return "".join(h)
 
 
-CHECKER_ICON = {"gcode_to_blocks": "route", "gcode_to_steps": "bolt", "modules": "plug", "size": "memory", "memory": "memory"}
+CHECKER_ICON = {"gcode_to_blocks": "route", "gcode_to_steps": "bolt", "modules": "plug", "size": "memory", "memory": "memory", "faults": "alert-triangle"}
 
 
 def main():
