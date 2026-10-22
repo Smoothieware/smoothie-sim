@@ -21,6 +21,11 @@ checkers/gcode_to_blocks.py --sim BUILD/smoothie-sim --config cases/cartesian/co
 Writes planned blocks in a text format, injects them into the real StepTicker, and checks per-axis step counts, block duration against the trapezoid time, and rates.
 `--blocks blocks.json` takes a blocks file; `--gcode file.gcode` runs G-code to steps in one go.
 
+With `--gcode` it also runs the end-of-job position check (`position_check.py`), on a cartesian machine and a G-code file it can follow (absolute or relative `G0`-`G3` end points in mm):
+the position integrated from the step and direction pin levels at every emitted pulse must equal the motor step counter, the Robot's machine position (within one step) and
+destination x `steps_per_mm` from the config, and the Robot's machine position must equal the G-code destination. Lost steps, a wrong steps/mm and an inverted direction fail it.
+`G20`, `G92`, `G28`, work offsets and non-cartesian arm solutions are reported as "not checked" with the reason, never guessed.
+
 ## 3. `modules_check.py`
 
 Three parts:

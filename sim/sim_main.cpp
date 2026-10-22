@@ -123,7 +123,12 @@ static void step_tick_once() {
     auto &acts = THEROBOT->actuators;
     SIM.in_isr = true;
     int owner = SIM.active_block;   // a block that finishes and a new one that starts can share one tick: charge steps to the block that was running before the tick
+    if (SIM.pulse_position.size() != acts.size()) SIM.pulse_position.assign(acts.size(), 0);
+    std::vector<bool> dir_before(acts.size());
+    for (size_t i = 0; i < acts.size(); i++) dir_before[i] = acts[i]->dir_pin.get();
     StepTicker::getInstance()->step_tick();
+    for (size_t i = 0; i < acts.size(); i++)   // a pulse is a high step pin; the direction pin says which way the driver moves (low = forward)
+        if (acts[i]->step_pin.get()) SIM.pulse_position[i] += dir_before[i] ? -1 : 1;
     StepTicker::getInstance()->unstep_tick();
     SIM.in_isr = false;
     if (SIM.last_steps.size() != acts.size()) { SIM.last_steps.resize(acts.size()); for (size_t i = 0; i < acts.size(); i++) SIM.last_steps[i] = acts[i]->get_current_step(); }
@@ -251,6 +256,8 @@ static void write_result(const char *path, const std::string &mode, bool full_st
     FILE *f = fopen(path, "w"); if (!f) { perror(path); return; }
     fprintf(f, "{\"schema\":1,\"mode\":\"%s\",\"step_period_us\":%.6f,\"n_actuators\":%d,\n", mode.c_str(), SIM.step_period_us, (int)THEROBOT->actuators.size());
     fputs("\"steps_per_mm\":", f); { std::vector<double> v; for (auto *a : THEROBOT->actuators) v.push_back(a->get_steps_per_mm()); put_arr(f, v); }
+    fputs(",\n\"pulse_position\":", f); { std::vector<double> v; for (size_t i = 0; i < THEROBOT->actuators.size(); i++) v.push_back(i < SIM.pulse_position.size() ? (double)SIM.pulse_position[i] : 0.0); put_arr(f, v); }
+    fputs(",\n\"machine_position\":", f); { std::vector<double> v; for (size_t i = 0; i < THEROBOT->actuators.size(); i++) v.push_back(THEROBOT->machine_position[i]); put_arr(f, v); }
     fputs(",\n\"final_steps\":", f); { std::vector<double> v; for (auto *a : THEROBOT->actuators) v.push_back(a->get_current_step()); put_arr(f, v); }
     fputs(",\n\"blocks\":[\n", f);
     for (size_t bi = 0; bi < SIM.blocks.size(); bi++) {

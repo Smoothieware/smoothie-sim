@@ -60,6 +60,7 @@ struct SimState {
     std::vector<BlockRec> blocks;
     int active_block = -1;
     std::vector<int32_t> last_steps;                // last observed current_step per actuator
+    std::vector<int64_t> pulse_position;            // position integrated from the step and direction pin levels at every emitted pulse
     std::vector<WaitRec> waits;
     std::map<std::string, HandlerStat> handlers;    // "Module::EVENT"
     std::map<std::string, std::vector<std::string>> hooks; // module -> events it was called for

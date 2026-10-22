@@ -4,6 +4,7 @@ smoothie-sim takes ideas and some adapted code from the [Carvera Firmware Simula
 
 Taken or inspired by that project:
 - RAM model (heap and AHB pool replay, per-class ARM sizes from DWARF, layout from the linker map): `checkers/memory_check.py` (heap model adapted from `include/sim/lpc_memory_accounting.hpp`), `checkers/lpc_dwarf.py` and `tools/lpc_memory_layout.py` (adapted from `scripts/lpc_memory_layout.py`), `sim/sim_alloc.cpp` (the idea of `src/firmware/firmware_allocation_hooks.cpp`), and the test cases of `tests/test_memory_model.py` (after `tests/lpc_memory_accounting_test.cpp`).
+- End-of-job position check (pulse-integrated position against the Robot's machine position and the G-code destination): inspired by their `StepperAxis`, which integrates emitted step and direction pulses into a position; the implementation (`checkers/position_check.py`, the pin sampling in `sim/sim_main.cpp`) is our own.
 - Event-ordered timer dispatch (next timer match, NVIC priority order): the design studied from their `timer_scheduler`, `interrupt_controller`, `event_engine` and `virtual_clock`; the implementation in `sim/sim_main.cpp` is our own, much smaller.
 
 Not taken: the GUI, the protobuf API, controller transports, Wi-Fi and Zigbee, the Makera protocol, tool changer, EEPROM, their build and packaging, Carvera configurations and board data, and the probe, spindle and laser models (possible future work).

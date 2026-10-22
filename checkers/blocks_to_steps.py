@@ -12,6 +12,7 @@ With --gcode instead of --blocks the G-code is first run through the simulator (
 import argparse, json, math, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from common import Result, run_sim, write_result, trapezoid_profile
+import position_check
 
 
 def write_injector(blocks, path):
@@ -72,12 +73,14 @@ def main():
     src = a.blocks
     if a.gcode:
         src = os.path.join(a.workdir, "stage1.json")
-        run_sim(a.sim, a.config, src, gcode=a.gcode, modules=a.modules, extra=["--no-steps"])
+        stage1 = run_sim(a.sim, a.config, src, gcode=a.gcode, modules=a.modules, extra=["--no-steps"])
     blocks_in = json.load(open(src))["blocks"]
     inj = os.path.join(a.workdir, "blocks_in.txt"); write_injector(blocks_in, inj)
     out = os.path.join(a.workdir, name + ".json")
     sim = run_sim(a.sim, a.config, out, blocks_in=inj, full_steps=False)
     check(res, blocks_in, sim, sim["steps_per_mm"])
+    if a.gcode:   # the injected-block run above bypasses the Robot, so the end-of-job position comes from the G-code run
+        position_check.check(res, stage1, open(a.gcode).read(), open(a.config).read())
     res.data.update({"sim_output": out, "blocks": len(blocks_in)})
     write_result(res, a.out)
     print(json.dumps({"type": "summary", "checker": name, "status": res.status, "counts": res.to_dict()["counts"]}))
