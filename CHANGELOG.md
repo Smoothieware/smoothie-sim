@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Added
+- README: one-line dependency install commands for nine Linux distributions, and the easily missed assumptions (GCC with a matching `gcov`, bash, GNU userland, network at first build, `patch` and `gh` for the PR replay).
+
 ## [0.1.0] - 2026-10-20
 
 ### Fixed

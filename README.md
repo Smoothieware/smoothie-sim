@@ -14,7 +14,7 @@ smoothie-sim copies a [Smoothieware](https://github.com/Smoothieware/Smoothiewar
 
 Install a [release](https://github.com/Smoothieware/smoothie-sim/releases) with `curl -fsSL https://github.com/Smoothieware/smoothie-sim/releases/latest/download/install.sh | sh` (also a `.deb`, an `.rpm` and a container image: [Installation](documentation/installation.md)) and run `smoothie-sim build && smoothie-sim check`. Or work from a checkout:
 
-You need `g++`, `make` and `python3` (standard library only) on Linux. The first `make` downloads the `edge` branch of [Smoothieware](https://github.com/Smoothieware/Smoothieware) into `fw/` (a shallow `git clone`), builds the simulator in `build/`, and needs no root. `run_checks.sh` with no arguments checks that firmware and writes results to `out/`.
+You need `g++` (with its `gcov`), `make`, `python3` (standard library only) and `git` on Linux; [one-line install commands for nine distributions](#install-the-dependencies). The first `make` downloads the `edge` branch of [Smoothieware](https://github.com/Smoothieware/Smoothieware) into `fw/` (a shallow `git clone`), builds the simulator in `build/`, and needs no root. `run_checks.sh` with no arguments checks that firmware and writes results to `out/`.
 
 ```sh
 make -j"$(nproc)"
@@ -30,6 +30,31 @@ To check your own firmware tree or a pull request, pass `SMOOTHIE_SRC=<path>` to
 ```
 
 More: [Getting started](documentation/getting-started.md) · [How it works](documentation/how-it-works.md)
+
+### Install the dependencies
+
+One line per distribution; each installs everything the build and the checks need (`g++` with its `gcov`, `make`, `python3`, `git`, `curl`, `tar`, CA certificates). Only Ubuntu 24.04 is tested by the project; the other names follow each distribution's package naming.
+
+| Distribution | Command |
+| --- | --- |
+| Debian, Ubuntu, Linux Mint | `sudo apt-get update && sudo apt-get install -y g++ make python3 git curl tar ca-certificates` |
+| Fedora | `sudo dnf install -y gcc-c++ make python3 git curl tar ca-certificates` |
+| RHEL, Rocky, AlmaLinux, CentOS Stream | `sudo dnf install -y gcc-c++ make python3 git curl tar ca-certificates` |
+| openSUSE Leap, Tumbleweed | `sudo zypper install -y gcc-c++ make python3 git curl tar ca-certificates` |
+| Arch, Manjaro | `sudo pacman -S --needed gcc make python git curl tar ca-certificates` |
+| Alpine | `sudo apk add g++ make python3 git curl tar ca-certificates bash` |
+| Void | `sudo xbps-install -S gcc make python3 git curl tar ca-certificates` |
+| Gentoo | `sudo emerge --ask sys-devel/gcc dev-build/make dev-lang/python dev-vcs/git net-misc/curl app-arch/tar app-misc/ca-certificates` |
+| NixOS, Nix on any OS | `nix-shell -p gcc gnumake python3 git curl gnutar cacert` |
+
+Optional, only for the RAM and flash comparison: Debian and Ubuntu `sudo apt-get install -y binutils-arm-none-eabi`, Fedora `sudo dnf install -y arm-none-eabi-binutils-cs`, Arch `sudo pacman -S --needed arm-none-eabi-binutils`, anywhere else the [Arm GNU Toolchain](https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads). Optional, only for the old-PR replay (`tools/`): the GitHub CLI `gh` (logged in) and `patch`; Debian and Ubuntu `sudo apt-get install -y gh patch`, Fedora `sudo dnf install -y gh patch`, Arch `sudo pacman -S --needed github-cli patch`.
+
+Assumptions that are easy to miss:
+
+- **GCC, not Clang.** The build uses GCC-only flags and the coverage step runs `gcov --json-format`, which needs GCC 9 or newer and a `gcov` of the same version as `g++` (with several GCCs installed, set `CXX=g++-13` and put `gcov-13` first on `PATH`). The simulator is built as a native 64-bit binary; Linux is the only tested platform and macOS is not supported.
+- **GNU userland.** The scripts use `nproc`, `readlink -f`, `sha256sum` and GNU `find`, `sed` and `tar`; on BSD or macOS they fail.
+- **bash.** `run_checks.sh`, `tools/*.sh` and the `smoothie-sim` wrapper need bash (`#!/usr/bin/env bash`); minimal images such as Alpine do not ship it, which is why it is in the Alpine line above. Python 3 runs without extra packages, but the checkers were only tried with Python 3.11, so expect a recent one is needed.
+- **Network at first build.** `make` clones Smoothieware `edge` from GitHub into `fw/` unless you pass `SMOOTHIE_SRC=<tree>`; behind a proxy or offline, clone the firmware yourself first.
 
 ## See it in action
 
