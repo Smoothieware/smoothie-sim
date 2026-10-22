@@ -66,10 +66,12 @@ def main():
     g.add_argument("--blocks", help="blocks JSON (simulator output schema)")
     g.add_argument("--gcode", help="G-code file: run G-code -> blocks -> steps in one go")
     ap.add_argument("--workdir", required=True); ap.add_argument("--modules", action="store_true"); ap.add_argument("--out", required=True)
+    ap.add_argument("--label", default="", help="suffix for the result name and title when one checker runs several programs (for example face)")
     a = ap.parse_args()
     os.makedirs(a.workdir, exist_ok=True)
     name = "gcode_to_steps" if a.gcode else "blocks_to_steps"
-    res = Result(name, "G-code to steps" if a.gcode else "Blocks to steps")
+    if a.label: name += "_" + a.label
+    res = Result(name, ("G-code to steps" if a.gcode else "Blocks to steps") + (" (%s)" % a.label if a.label else ""))
     src = a.blocks
     if a.gcode:
         src = os.path.join(a.workdir, "stage1.json")

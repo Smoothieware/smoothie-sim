@@ -104,3 +104,4 @@ Parts of smoothie-sim are adapted from, or inspired by, the [Carvera Firmware Si
 - End-of-job position check: the idea of integrating emitted step and direction pulses into a position, from their `StepperAxis` (our own implementation, `checkers/position_check.py`).
 - Over-temperature fault injection: the idea from their `tests/temperature_fault_runtime_test.cpp` (our own implementation, `checkers/fault_check.py`).
 - Event-ordered timer dispatch: the design studied from their `timer_scheduler`, `interrupt_controller`, `event_engine` and `virtual_clock` (our own implementation in `sim/sim_main.cpp`).
+- The Fusion facing program `cases/cartesian/face-4x4-stock.gcode` is `tests/resources/Face 4x4 stock.cnc` from the [Carvera_Controller](https://github.com/carvera-community/Carvera_Controller) repository, copied unchanged.
