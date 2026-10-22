@@ -352,7 +352,7 @@ def hero(title, subject, subject_link, overall, run_url, allr, R, stamp):
         chips.append(f'<a class="chip chip-info" href="{esc(run_url)}" target="_blank" rel="noopener noreferrer">{icon("terminal-2", 12)}<span>CI run</span>{icon("external-link", 12)}</a>')
     cards = (stat_card("Checkers", str(len(allr)), "", "plug") + stat_card("Checks passed", str(tot["pass"]), "pass", "circle-check")
              + stat_card("Checks failed", str(tot["fail"]), "fail" if tot["fail"] else "pass", "circle-x") + stat_card("Warnings", str(tot["warn"]), "warn" if tot["warn"] else "pass", "alert-triangle"))
-    per = "".join(stat_card(r["title"], f'{int(num(r["counts"].get("pass")))} / {int(num(r["counts"].get("warn")))} / {int(num(r["counts"].get("fail")))}',
+    per = "".join(stat_card(r["title"], f'{int(num(r["counts"].get("pass")))}\u00a0/\u00a0{int(num(r["counts"].get("warn")))}\u00a0/\u00a0{int(num(r["counts"].get("fail")))}',
                             r["status"], r.get("icon", "")) for r in R if r.get("counts"))
     words = {"pass": "All checks passed", "warn": "Passed with warnings", "fail": "At least one check failed"}
     return (f'<header class="hero rp-hero {overall}"><div class="hero-top"><div class="rp-title"><span class="rp-orb">{icon(STATUS_ICON[overall], 34)}</span>'
