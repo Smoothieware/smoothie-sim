@@ -12,6 +12,7 @@ With --gcode instead of --blocks the G-code is first run through the simulator (
 import argparse, json, math, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from common import Result, run_sim, write_result, trapezoid_profile
+import position_check
 
 
 def write_injector(blocks, path):
@@ -65,19 +66,23 @@ def main():
     g.add_argument("--blocks", help="blocks JSON (simulator output schema)")
     g.add_argument("--gcode", help="G-code file: run G-code -> blocks -> steps in one go")
     ap.add_argument("--workdir", required=True); ap.add_argument("--modules", action="store_true"); ap.add_argument("--out", required=True)
+    ap.add_argument("--label", default="", help="suffix for the result name and title when one checker runs several programs (for example face)")
     a = ap.parse_args()
     os.makedirs(a.workdir, exist_ok=True)
     name = "gcode_to_steps" if a.gcode else "blocks_to_steps"
-    res = Result(name, "G-code to steps" if a.gcode else "Blocks to steps")
+    if a.label: name += "_" + a.label
+    res = Result(name, ("G-code to steps" if a.gcode else "Blocks to steps") + (" (%s)" % a.label if a.label else ""))
     src = a.blocks
     if a.gcode:
         src = os.path.join(a.workdir, "stage1.json")
-        run_sim(a.sim, a.config, src, gcode=a.gcode, modules=a.modules, extra=["--no-steps"])
+        stage1 = run_sim(a.sim, a.config, src, gcode=a.gcode, modules=a.modules, extra=["--no-steps"])
     blocks_in = json.load(open(src))["blocks"]
     inj = os.path.join(a.workdir, "blocks_in.txt"); write_injector(blocks_in, inj)
     out = os.path.join(a.workdir, name + ".json")
     sim = run_sim(a.sim, a.config, out, blocks_in=inj, full_steps=False)
     check(res, blocks_in, sim, sim["steps_per_mm"])
+    if a.gcode:   # the injected-block run above bypasses the Robot, so the end-of-job position comes from the G-code run
+        position_check.check(res, stage1, open(a.gcode).read(), open(a.config).read())
     res.data.update({"sim_output": out, "blocks": len(blocks_in)})
     write_result(res, a.out)
     print(json.dumps({"type": "summary", "checker": name, "status": res.status, "counts": res.to_dict()["counts"]}))

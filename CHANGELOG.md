@@ -3,6 +3,10 @@
 ## [Unreleased]
 
 ### Added
+- Event-ordered timer dispatch in the simulator, now the default: the step and slow tickers run in time order with ties broken by NVIC priority, `--fixed-tick` restores the old order. Results were identical on all workload cases and the 8 replayed PRs and the run time did not change. `tools/compare_dispatch.py` compares both modes; checkers pass extra simulator options through `SMOOTHIE_SIM_ARGS`.
+- Fault injection checker `checkers/fault_check.py` with `cases/faults/`: an over-temperature reading while a heater target is set must halt the machine through the real TemperatureControl and refuse later moves; a control run must not halt. Shown in the report as "Fault injection".
+- End-of-job position check in `gcode_to_steps` (`checkers/position_check.py`): the position integrated from the step and direction pin levels at every pulse must equal the motor step counter, the Robot's machine position and the G-code destination x steps/mm (catches lost steps, a wrong steps/mm and an inverted direction). The simulator result gains `pulse_position` and `machine_position`. Programs the parser cannot follow (`G20`, `G92`, `G28`, non-cartesian arms) are reported as not checked.
+- RAM model (`checkers/memory_check.py`, `tools/lpc_memory_layout.py`): the simulator can log every allocation (`--alloc-trace`), and the checker replays it on the LPC1768 main SRAM heap and AHB0 pool built from a real ARM build's linker map and DWARF class sizes. The report gets a section with peak live bytes, fragmentation, largest free block, failed allocations and the room below the stack; without an ARM build it says "not measured". `overlay/libs/MemoryPool.h` marks pool allocations as AHB0. The idea and the heap model are adapted from the Carvera Firmware Simulator by Konstantin Tcepliaev (GPL version 3 or later); see [Acknowledgements](documentation/acknowledgements.md).
 - README: one-line dependency install commands for nine Linux distributions, and the easily missed assumptions (GCC with a matching `gcov`, bash, GNU userland, network at first build, `patch` and `gh` for the PR replay).
 
 ## [0.1.0] - 2026-10-20

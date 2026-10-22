@@ -50,6 +50,7 @@ struct SimState {
     int adc_value = 3900;           // 12-bit raw ADC value fed to every channel (default is about 25 C on a 100k thermistor)
     uint64_t now_us = 0;
     double next_step_tick_us = 0, next_slow_tick_us = 0;
+    bool event_dispatch = true;    // timers are served in time order, ties by interrupt priority; --fixed-tick restores all step ticks of a millisecond first
     double step_period_us = 10.0;
     bool machine_enabled = false;
     bool in_isr = false;
@@ -59,6 +60,7 @@ struct SimState {
     std::vector<BlockRec> blocks;
     int active_block = -1;
     std::vector<int32_t> last_steps;                // last observed current_step per actuator
+    std::vector<int64_t> pulse_position;            // position integrated from the step and direction pin levels at every emitted pulse
     std::vector<WaitRec> waits;
     std::map<std::string, HandlerStat> handlers;    // "Module::EVENT"
     std::map<std::string, std::vector<std::string>> hooks; // module -> events it was called for

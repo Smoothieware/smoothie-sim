@@ -511,6 +511,7 @@ summary:hover{color:var(--fg)}
 .stat-body{min-width:0}
 .stat-label{font-size:11.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--mut)}
 .stat-value{font-size:1.5rem;font-weight:700;line-height:1.2;letter-spacing:-.02em;overflow-wrap:anywhere}
+.stat-value{white-space:nowrap}.stats .stat-value{font-size:clamp(1.05rem,2.1vw,1.5rem)}
 .stat-pass::before{background:var(--pass)}.stat-pass .stat-ic{background:var(--pass-bg);color:var(--pass-tx)}
 .stat-fail::before{background:var(--fail)}.stat-fail .stat-ic{background:var(--fail-bg);color:var(--fail-tx)}
 .stat-warn::before{background:var(--warn)}.stat-warn .stat-ic{background:var(--warn-bg);color:var(--warn-tx)}

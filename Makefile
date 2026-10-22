@@ -52,7 +52,7 @@ $(BUILD)/smoothie-sim: $(STAGE)/.done
 	$(MAKE) -f $(HERE)Makefile RACE=$(RACE) BUILD=$(BUILD) SMOOTHIE_SRC=$(SMOOTHIE_SRC) COVERAGE=$(COVERAGE) EXTRA_FILES='$(EXTRA_FILES)' link
 .PHONY: $(BUILD)/smoothie-sim link
 link: $(OBJS) $(SIMOBJS)
-	$(CXX) $(if $(filter 1,$(COVERAGE)),--coverage) -o $(BUILD)/smoothie-sim $(OBJS) $(SIMOBJS)
+	$(CXX) $(if $(filter 1,$(COVERAGE)),--coverage) -Wl,--wrap=malloc,--wrap=calloc,--wrap=realloc,--wrap=free -o $(BUILD)/smoothie-sim $(OBJS) $(SIMOBJS)
 $(BUILD)/obj/%.o: $(STAGE)/src/%.cpp $(wildcard $(HERE)shim/*.h)
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) $(INCS) -c $< -o $@
